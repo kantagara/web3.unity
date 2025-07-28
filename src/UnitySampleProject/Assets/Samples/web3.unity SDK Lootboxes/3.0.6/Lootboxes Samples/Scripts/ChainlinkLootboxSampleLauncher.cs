@@ -26,11 +26,8 @@ namespace LootBoxes.Chainlink
 
         private Web3 web3;
 
-        private class Web3Config : ICompleteProjectConfig
+        private class Web3Config : IChainConfigSet
         {
-            public string ProjectId => string.Empty;
-            public bool EnableAnalytics => true;
-
             public IEnumerable<IChainConfig> Configs { get; } = new[]
             {
                 new ChainConfigEntry

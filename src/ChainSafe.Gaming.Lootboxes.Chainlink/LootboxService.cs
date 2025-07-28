@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -9,9 +10,7 @@ using ChainSafe.Gaming.Evm.Providers;
 using ChainSafe.Gaming.Evm.Signers;
 using ChainSafe.Gaming.Evm.Transactions;
 using ChainSafe.Gaming.Web3;
-using ChainSafe.Gaming.Web3.Analytics;
 using ChainSafe.Gaming.Web3.Core;
-using ChainSafe.Gaming.Web3.Core.Debug;
 using ChainSafe.Gaming.Web3.Environment;
 using Nethereum.ABI.FunctionEncoding;
 using Nethereum.Hex.HexTypes;
@@ -24,11 +23,12 @@ namespace ChainSafe.Gaming.Lootboxes.Chainlink
     {
         public const int GasPerUnit = 100000;
 
+        private readonly IHttpClient httpClient;
         private readonly IContractBuilder contractBuilder;
+        private readonly IChainConfig chainConfig;
         private readonly LootboxServiceConfig config;
         private readonly ISigner signer;
         private readonly IRpcProvider rpcProvider;
-        private readonly IAnalyticsClient analyticsClient;
 
         private Contract contract;
         private Dictionary<string, RewardType> rewardTypeByTokenAddress;
@@ -36,11 +36,9 @@ namespace ChainSafe.Gaming.Lootboxes.Chainlink
         public LootboxService(
             LootboxServiceConfig config,
             IContractBuilder contractBuilder,
-            IRpcProvider rpcProvider,
-            IAnalyticsClient analyticsClient)
+            IRpcProvider rpcProvider)
         {
             this.rpcProvider = rpcProvider;
-            this.analyticsClient = analyticsClient;
             this.config = config;
             this.contractBuilder = contractBuilder;
         }
@@ -48,24 +46,25 @@ namespace ChainSafe.Gaming.Lootboxes.Chainlink
         public LootboxService(
             LootboxServiceConfig config,
             IContractBuilder contractBuilder,
-            IRpcProvider rpcProvider,
             ISigner signer,
-            IAnalyticsClient analyticsClient)
-            : this(config, contractBuilder, rpcProvider, analyticsClient)
+            IRpcProvider rpcProvider,
+            IHttpClient httpClient,
+            IChainConfig chainConfig)
         {
+            this.config = config;
+            this.contractBuilder = contractBuilder;
             this.signer = signer;
+            this.rpcProvider = rpcProvider;
+            this.httpClient = httpClient;
+            this.chainConfig = chainConfig;
         }
 
         async ValueTask ILifecycleParticipant.WillStartAsync()
         {
-            var contractAbi = this.config.ContractAbi.AssertNotNull(nameof(this.config.ContractAbi));
-            var contractAddress = this.config.ContractAddress.AssertNotNull(nameof(this.config.ContractAddress));
+            var contractAbi = this.config.ContractAbi ?? throw new ArgumentNullException(nameof(this.config.ContractAbi));
+            var contractAddress = this.config.ContractAddress ?? throw new ArgumentNullException(nameof(this.config.ContractAddress));
 
-            analyticsClient.CaptureEvent(new AnalyticsEvent()
-            {
-                EventName = "Lootboxes Initialized",
-                PackageName = "io.chainsafe.web3-unity.lootboxes",
-            });
+            // Analytics removed
 
             // todo check if contract is correct
             this.contract = this.contractBuilder.Build(contractAbi, contractAddress);
@@ -139,7 +138,7 @@ namespace ChainSafe.Gaming.Lootboxes.Chainlink
         public async Task<BigInteger> CalculateOpenPrice(uint lootboxType, uint lootboxCount)
         {
             var rewardCount = lootboxType * lootboxCount;
-            var rawGasPrice = (await this.rpcProvider.GetGasPrice()).AssertNotNull("gasPrice").Value;
+            var rawGasPrice = (await this.rpcProvider.GetGasPrice() ?? throw new InvalidOperationException("gasPrice")).Value;
             var safeGasPrice = (rawGasPrice * 2) + BigInteger.Divide(rawGasPrice, new BigInteger(2)); // 300%
 
             var response = await this.contract.Call(

@@ -1,5 +1,4 @@
 using ChainSafe.Gaming.Unity;
-using ChainSafe.Gaming.Web3.Analytics;
 using ChainSafe.Gaming.Web3.Build;
 using ChainSafe.Gaming.Web3.Core.Unity;
 using ChainSafe.Gaming.Web3.Environment;
@@ -10,23 +9,19 @@ namespace ChainSafe.Gaming.Web3.Unity
     public static class UnityEnvironmentExtensions
     {
         /// <summary>
-        /// Registers Unity specific services for the Web3 environment.
+        /// Binds Unity-specific environment components to the Web3 builder.
+        /// This includes platform specific http clients, loggers, etc.
         /// </summary>
-        /// <param name="services">Service collection that is already in use.</param>
-        /// <returns>Updated Service collection.</returns>
-        public static IWeb3ServiceCollection UseUnityEnvironment(this IWeb3ServiceCollection services)
+        /// <param name="collection">Service collection to bind to.</param>
+        /// <returns>Service collection.</returns>
+        public static IWeb3ServiceCollection UseUnityEnvironment(this IWeb3ServiceCollection collection)
         {
-            services.AddSingleton<Web3Environment>();
-            services.AddSingleton<IMainThreadRunner, UnityDispatcherAdapter>();
-            services.AddSingleton<IHttpClient, UnityHttpClient>();
-            services.AddSingleton<ILogWriter, UnityLogWriter>();
-            services.AddSingleton<IOperatingSystemMediator, UnityOperatingSystemMediator>();
-#if ENABLE_ANALYTICS
-            services.AddSingleton<IAnalyticsClient, CountlyAnalytics>();
-#else
-            services.DisableAnalytics();
-#endif
-            return services;
+            collection.AssertServiceNotBound<Web3Environment>();
+
+            return (IWeb3ServiceCollection)collection.AddSingleton<IHttpClient, UnityHttpClient>()
+                .AddSingleton<ILogWriter, UnityLogWriter>()
+                .AddSingleton<IOperatingSystemMediator, UnityOperatingSystemMediator>()
+                .AddSingleton<Web3Environment>();
         }
     }
 }

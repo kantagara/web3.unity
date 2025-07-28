@@ -170,7 +170,7 @@ namespace Scripts.EVM.Marketplace
                     new MultipartFormDataSection("name", _name),
                     new MultipartFormDataSection("owner", Web3Unity.Web3.Signer.PublicAddress),
                     new MultipartFormDataSection("chain_id", Web3Unity.Web3.ChainConfig.ChainId),
-                    new MultipartFormDataSection("projectID", Web3Unity.Web3.ProjectConfig.ProjectId),
+                    new MultipartFormDataSection("projectID", ProjectConfigUtilities.Load()?.ProjectId ?? ""),
                     new MultipartFormFileSection("logo", logoImageData, "logo.png", "image/png"),
                     new MultipartFormFileSection("banner", bannerImageData, "banner.png", "image/png"),
                     new MultipartFormDataSection("isImported", "true"),
@@ -187,7 +187,7 @@ namespace Scripts.EVM.Marketplace
             var method = "create721Collection";
             object[] args =
             {
-                    Web3Unity.Web3.ProjectConfig.ProjectId,
+                    ProjectConfigUtilities.Load()?.ProjectId ?? "",
                     collectionData.id,
                     _name,
                     collectionData.type,
@@ -219,7 +219,7 @@ namespace Scripts.EVM.Marketplace
                     new MultipartFormDataSection("name", _name),
                     new MultipartFormDataSection("owner", Web3Unity.Web3.Signer.PublicAddress),
                     new MultipartFormDataSection("chain_id", Web3Unity.Web3.ChainConfig.ChainId),
-                    new MultipartFormDataSection("projectID", Web3Unity.Web3.ProjectConfig.ProjectId),
+                    new MultipartFormDataSection("projectID", ProjectConfigUtilities.Load()?.ProjectId ?? ""),
                     new MultipartFormFileSection("logo", logoImageData, "logo.png", "image/png"),
                     new MultipartFormFileSection("banner", bannerImageData, "banner.png", "image/png"),
                     new MultipartFormDataSection("isImported", "true"),
@@ -236,7 +236,7 @@ namespace Scripts.EVM.Marketplace
                 var method = "create1155Collection";
                 object[] args =
                 {
-                    Web3Unity.Web3.ProjectConfig.ProjectId,
+                    ProjectConfigUtilities.Load()?.ProjectId ?? "",
                     collectionData.id,
                     collectionData.banner,
                     _isMintingPublic
@@ -409,7 +409,7 @@ namespace Scripts.EVM.Marketplace
                 var method = "createMarketplace";
                 object[] args =
                 {
-                    Web3Unity.Web3.ProjectConfig.ProjectId,
+                    ProjectConfigUtilities.Load()?.ProjectId ?? "",
                     collectionData.id,
                     _whitelisting
                 };

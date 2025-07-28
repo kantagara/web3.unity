@@ -2,18 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ChainSafe.Gaming.Evm;
+using ChainSafe.Gaming.Evm.Providers;
+using ChainSafe.Gaming.Evm.Signers;
+using ChainSafe.Gaming.Evm.Utils;
+using ChainSafe.Gaming.LocalStorage;
 using ChainSafe.Gaming.WalletConnect.Connection;
 using ChainSafe.Gaming.WalletConnect.Methods;
 using ChainSafe.Gaming.WalletConnect.Models;
 using ChainSafe.Gaming.WalletConnect.Storage;
 using ChainSafe.Gaming.WalletConnect.Wallets;
 using ChainSafe.Gaming.Web3;
-using ChainSafe.Gaming.Web3.Analytics;
 using ChainSafe.Gaming.Web3.Core;
+using ChainSafe.Gaming.Web3.Core.Chains;
 using ChainSafe.Gaming.Web3.Core.Debug;
 using ChainSafe.Gaming.Web3.Environment;
 using ChainSafe.Gaming.Web3.Evm.Wallet;
+using WalletConnectSharp.Core.Controllers;
+using WalletConnectSharp.Core.Models.Relay;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.JsonRpc.Client.RpcMessages;
 using Newtonsoft.Json;
@@ -39,13 +44,13 @@ namespace ChainSafe.Gaming.WalletConnect
     {
         private readonly ILogWriter logWriter;
         private readonly IWalletConnectConfig config;
-        private readonly DataStorage storage;
+        private readonly ChainSafe.Gaming.WalletConnect.Storage.DataStorage storage;
         private readonly IChainConfig chainConfig;
         private readonly IOperatingSystemMediator osMediator;
         private readonly IWalletRegistry walletRegistry;
         private readonly RedirectionHandler redirection;
         private readonly IHttpClient httpClient;
-        private readonly IAnalyticsClient analyticsClient;
+        private readonly Web3Environment environment;
 
         private WalletConnectCore core;
         private WalletConnectSignClient signClient;
@@ -58,14 +63,13 @@ namespace ChainSafe.Gaming.WalletConnect
 
         public WalletConnectProvider(
             IWalletConnectConfig config,
-            DataStorage storage,
+            ChainSafe.Gaming.WalletConnect.Storage.DataStorage storage,
             IChainConfig chainConfig,
             IWalletRegistry walletRegistry,
             RedirectionHandler redirection,
             Web3Environment environment)
             : base(environment, chainConfig)
         {
-            analyticsClient = environment.AnalyticsClient;
             this.redirection = redirection;
             this.walletRegistry = walletRegistry;
             osMediator = environment.OperatingSystem;
@@ -74,6 +78,7 @@ namespace ChainSafe.Gaming.WalletConnect
             this.config = config;
             logWriter = environment.LogWriter;
             httpClient = environment.HttpClient;
+            this.environment = environment;
         }
 
         public bool StoredSessionAvailable => localData.SessionTopic != null;
@@ -94,12 +99,7 @@ namespace ChainSafe.Gaming.WalletConnect
                 return;
             }
 
-            analyticsClient.CaptureEvent(new AnalyticsEvent()
-            {
-                EventName = "Wallet Connect Initialized",
-                PackageName = "io.chainsafe.web3-unity",
-            });
-
+            // Analytics removed
             ValidateConfig();
 
             WCLogger.Logger = new WCLogWriter(logWriter, config);

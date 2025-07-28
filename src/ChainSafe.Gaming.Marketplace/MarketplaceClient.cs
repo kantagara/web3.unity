@@ -28,7 +28,6 @@ namespace ChainSafe.Gaming.Marketplace
     {
         private readonly IMarketplaceConfig config;
         private readonly IHttpClient httpClient;
-        private readonly IProjectConfig projectConfig;
         private readonly IChainConfig chainConfig;
         private readonly IContractBuilder contractBuilder;
 
@@ -37,17 +36,15 @@ namespace ChainSafe.Gaming.Marketplace
         /// Constructor creates an instance of the marketplace client class with config overload.
         /// </summary>
         /// <param name="httpClient">Http client.</param>
-        /// <param name="projectConfig">Project config.</param>
         /// <param name="chainConfig">Chain config.</param>
         /// <param name="contractBuilder">Contract builder.</param>
         /// <param name="config">Overload config.</param>
-        public MarketplaceClient(IHttpClient httpClient, IProjectConfig projectConfig, IChainConfig chainConfig, IContractBuilder contractBuilder, IMarketplaceConfig config)
+        public MarketplaceClient(IHttpClient httpClient, IChainConfig chainConfig, IContractBuilder contractBuilder, IMarketplaceConfig config)
         {
             this.contractBuilder = contractBuilder;
             this.chainConfig = chainConfig;
             this.httpClient = httpClient;
             this.config = config;
-            this.projectConfig = projectConfig;
         }
 
         /// <summary>
@@ -94,7 +91,7 @@ namespace ChainSafe.Gaming.Marketplace
             }
 
             var marketplaceId = config.MarketplaceId;
-            var projectId = !string.IsNullOrEmpty(config.ProjectIdOverride) ? config.ProjectIdOverride : this.projectConfig.ProjectId;
+            var projectId = config.ProjectIdOverride;
             var baseUri = $"{endpoint}/v1/projects/{projectId}/marketplaces/{marketplaceId}/items";
             var queryParameters = new Dictionary<string, string>();
 

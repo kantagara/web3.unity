@@ -79,6 +79,9 @@ namespace ChainSafe.GamingSdk.Editor
                 chainConfig.BlockExplorerUrl = EditorGUILayout.TextField("Block Explorer", chainConfig.BlockExplorerUrl);
 
                 GUI.enabled = true;
+                if(window.chainList == null || window.chainList.Count == 0)
+                    return;
+                selectedChainIndex = 0;
 
                 // Remove "https://" so the user doesn't have to click through 2 levels for the rpc options
                 var rpcOptions = window.chainList[selectedChainIndex].rpc.Where(x => x.StartsWith("https"))
@@ -152,7 +155,6 @@ namespace ChainSafe.GamingSdk.Editor
                 EditorGUI.indentLevel--;
                 if (EditorGUI.EndChangeCheck() || changedRpcOrWs)
                 {
-                    Debug.Log("Change detected.");
                     changedRpcOrWs = false;
                     EditorUtility.SetDirty(configAsset);
                 }

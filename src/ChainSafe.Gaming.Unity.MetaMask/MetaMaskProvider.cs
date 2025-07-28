@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
-using ChainSafe.Gaming.Evm;
+using ChainSafe.Gaming.Evm.Providers;
+using ChainSafe.Gaming.Unity.MetaMask;
 using ChainSafe.Gaming.Web3;
-using ChainSafe.Gaming.Web3.Analytics;
+using ChainSafe.Gaming.Web3.Core.Chains;
+using ChainSafe.Gaming.Web3.Core.Evm;
 using ChainSafe.Gaming.Web3.Environment;
 using ChainSafe.Gaming.Web3.Evm.Wallet;
 using UnityEngine;
@@ -18,22 +20,17 @@ namespace ChainSafe.Gaming.Unity.MetaMask
 
         private readonly MetaMaskController metaMaskController;
         private readonly IChainConfig chainConfig;
-        private readonly IAnalyticsClient analyticsClient;
-        private readonly ChainRegistryProvider chainRegistryProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaMaskProvider"/> class.
         /// </summary>
         /// <param name="environment">Injected <see cref="Web3Environment"/>.</param>
         /// <param name="chainConfig">Injected <see cref="IChainConfig"/>.</param>
-        /// <param name="chainRegistryProvider">Injected <see cref="ChainRegistryProvider"/>.</param>
-        public MetaMaskProvider(Web3Environment environment, IChainConfig chainConfig, ChainRegistryProvider chainRegistryProvider)
+        public MetaMaskProvider(Web3Environment environment, IChainConfig chainConfig)
             : base(environment, chainConfig)
         {
             logWriter = environment.LogWriter;
             this.chainConfig = chainConfig;
-            analyticsClient = environment.AnalyticsClient;
-            this.chainRegistryProvider = chainRegistryProvider;
 
             if (Application.isEditor || Application.platform != RuntimePlatform.WebGLPlayer)
             {
@@ -78,13 +75,7 @@ namespace ChainSafe.Gaming.Unity.MetaMask
         {
             logWriter.Log("Connecting from Metamask...");
 
-            analyticsClient.CaptureEvent(new AnalyticsEvent()
-            {
-                EventName = "Metamask WebGL Initialized",
-                PackageName = "io.chainsafe.web3-unity",
-            });
-
-            return await metaMaskController.Connect(chainConfig, chainRegistryProvider);
+            return await metaMaskController.Connect(chainConfig, null);
         }
     }
 }

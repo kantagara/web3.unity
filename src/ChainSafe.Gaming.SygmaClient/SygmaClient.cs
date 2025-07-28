@@ -1,24 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using ChainSafe.Gaming.Evm.Contracts;
 using ChainSafe.Gaming.Evm.Signers;
 using ChainSafe.Gaming.Evm.Transactions;
-using ChainSafe.Gaming.Evm.Utils;
 using ChainSafe.Gaming.SygmaClient.Contracts;
 using ChainSafe.Gaming.SygmaClient.Dto;
 using ChainSafe.Gaming.SygmaClient.Types;
 using ChainSafe.Gaming.Web3;
-using ChainSafe.Gaming.Web3.Analytics;
 using ChainSafe.Gaming.Web3.Core;
+using ChainSafe.Gaming.Web3.Core.Debug;
 using ChainSafe.Gaming.Web3.Environment;
 using Nethereum.ABI;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
+using Nethereum.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Environment = ChainSafe.Gaming.SygmaClient.Types.Environment;
@@ -31,20 +31,16 @@ namespace ChainSafe.Gaming.SygmaClient
         private readonly ISigner signer;
         private readonly IChainConfig sourceChainConfig;
         private readonly IChainConfig destinationChainConfig;
-        private readonly IAnalyticsClient analyticsClient;
-        private readonly IProjectConfig projectConfig;
         private readonly Config clientConfiguration;
         private readonly IHttpClient httpClient;
         private readonly ILogWriter logWriter;
 
-        public SygmaClient(ILogWriter logWriter, IHttpClient httpClient, IChainConfig sourceChainConfig, IChainConfig destinationChainConfig, ISigner signer, IContractBuilder contractBuilder, IAnalyticsClient analyticsClient, IProjectConfig projectConfig)
+        public SygmaClient(ILogWriter logWriter, IHttpClient httpClient, IChainConfig sourceChainConfig, IChainConfig destinationChainConfig, ISigner signer, IContractBuilder contractBuilder)
         {
             this.contractBuilder = contractBuilder;
             this.signer = signer;
             this.sourceChainConfig = sourceChainConfig;
             this.destinationChainConfig = destinationChainConfig;
-            this.analyticsClient = analyticsClient;
-            this.projectConfig = projectConfig;
             clientConfiguration = new Config(httpClient, uint.Parse(sourceChainConfig.ChainId));
             this.httpClient = httpClient;
             this.logWriter = logWriter;
@@ -228,7 +224,7 @@ namespace ChainSafe.Gaming.SygmaClient
             }
 
             // Convert recipient string to byte array.
-            byte[] recipientBytes = Units.ConvertHexStringToByteArray(recipient);
+            byte[] recipientBytes = recipient.HexToByteArray();
 
             // Encode the length of the recipient byte array as a 32-byte array.
             BigInteger recipientLengthBigInt = new BigInteger(recipientBytes.Length);
@@ -255,7 +251,7 @@ namespace ChainSafe.Gaming.SygmaClient
             {
                 Amounts = new[] { BigInteger.Parse("1") },
                 TokenIds = new[] { BigInteger.Parse(tokenId) },
-                DestinationRecipientAddress = Units.ConvertHexStringToByteArray(recipient),
+                DestinationRecipientAddress = recipient.HexToByteArray(),
             };
 
             return abiEncode.GetABIEncoded(data).ToHex();
