@@ -58,7 +58,7 @@ namespace ChainSafe.Gaming.UnityPackage.UI
         {
             try
             {
-                ShowLoading();
+                //ShowLoading();
 
                 await Web3Unity.Instance.Connect(provider);
             }

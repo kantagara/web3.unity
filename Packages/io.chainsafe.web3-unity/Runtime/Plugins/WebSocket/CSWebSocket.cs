@@ -195,7 +195,12 @@ namespace NativeWebSocket
     {
         public ConfiguredTaskAwaitable.ConfiguredTaskAwaiter GetAwaiter()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // WebGL doesn't support background threads, return completed task
+            return Task.CompletedTask.ConfigureAwait(false).GetAwaiter();
+#else
             return Task.Run(() => { }).ConfigureAwait(false).GetAwaiter();
+#endif
         }
     }
 

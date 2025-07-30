@@ -21,6 +21,7 @@ namespace ChainSafe.Gaming.Web3.Unity
             return (IWeb3ServiceCollection)collection.AddSingleton<IHttpClient, UnityHttpClient>()
                 .AddSingleton<ILogWriter, UnityLogWriter>()
                 .AddSingleton<IOperatingSystemMediator, UnityOperatingSystemMediator>()
+                .AddSingleton<IMainThreadRunner, UnityDispatcherAdapter>()
                 .AddSingleton<Web3Environment>();
         }
     }

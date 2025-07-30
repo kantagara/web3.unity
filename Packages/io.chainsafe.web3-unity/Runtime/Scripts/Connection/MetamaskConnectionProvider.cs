@@ -1,9 +1,12 @@
 using System.Threading.Tasks;
+using ChainSafe.Gaming.Unity;
 #if UNITY_WEBGL && !UNITY_EDITOR
 using ChainSafe.Gaming.Unity.MetaMask;
 using ChainSafe.Gaming.Web3.Evm.Wallet;
 #endif
 using ChainSafe.Gaming.Web3.Build;
+using ChainSafe.Gaming.Web3.Environment;
+using Microsoft.Extensions.DependencyInjection;
 using UnityEngine;
 using UnityEngine.UI;
 
